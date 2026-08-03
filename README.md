@@ -1,96 +1,134 @@
-# Proyecto SECOP II — Big Data e Ingeniería de Datos
+# Proyecto · SECOP II — Contratos Electrónicos
 
-Proyecto del semestre para la asignatura IFPN0025, construido sobre la fuente
-**SECOP II — Contratos Electrónicos** (Colombia Compra Eficiente / datos.gov.co).
+Proyecto del curso IFPN0025 · Big Data e Ingeniería de Datos · Universidad Ean.
+Fuente de datos: **SECOP II — Contratos Electrónicos**, publicada por la Agencia Nacional de Contratación Pública (Colombia Compra Eficiente) en datos.gov.co.
 
-## Qué necesita para levantar este proyecto
+---
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado y corriendo
+## Requisitos previos
+
+Lo que debe estar instalado antes de empezar:
+
 - Git
+- Docker Desktop (incluye Docker Compose)
 
-No necesita instalar Python, pandas, PostgreSQL, ni ninguna librería en su
-equipo: todo corre dentro de los contenedores.
+No se requiere instalar Python, pandas, PostgreSQL ni ninguna librería en el equipo anfitrión: todo corre dentro de los contenedores.
 
-## Configurar variables de entorno (obligatorio antes del primer levantamiento)
+**Ruta de infraestructura usada:** A · Docker local
 
-Este proyecto usa un segundo servicio, PostgreSQL, que requiere credenciales.
-Esas credenciales **nunca se versionan en Git**. Antes de levantar el
-proyecto por primera vez:
+---
 
-```bash
-cp .env.example .env
+## Cómo levantar el entorno
+
+Pasos exactos, del clon a un entorno corriendo:
+
 ```
+# 1. Clonar
+git clone https://github.com/sofiihenaotorress2007-a11y/proyecto-secop.git
+cd proyecto-secop
 
-y edite `.env` con sus propios valores (o deje los de ejemplo si solo va a
-usarlo localmente).
+# 2. Configurar variables de entorno
+cp .env.example .env
+# los valores de ejemplo funcionan para uso local; edítelos si lo requiere
 
-## Cómo se levanta (un solo comando)
-
-```bash
+# 3. Levantar
 docker compose up
 ```
 
-Esto levanta dos servicios:
-- **db**: PostgreSQL 16.4, con los datos persistidos en un volumen de Docker
-- **jupyter**: espera a que `db` esté saludable (`healthcheck`), instala las
-  dependencias ancladas en `requirements.txt`, y expone Jupyter en:
+La primera vez tarda varios minutos: descarga las imágenes de Jupyter y PostgreSQL, e instala las dependencias ancladas en `requirements.txt`.
 
-```
-http://localhost:8888
-```
+---
 
-Ábralo en su navegador. Debería ver la carpeta `work/` con `notebooks/`, `src/`,
-`data/` y `docs/`.
+## Cómo saber que quedó bien
 
-## Cómo se conectan los dos servicios entre sí
+Qué debe ver cuando todo funciona:
 
-Jupyter no se conecta a PostgreSQL usando `localhost`, sino usando el
-**nombre del servicio** declarado en `docker-compose.yml` (`db`). Docker
-Compose crea automáticamente una red interna donde cada servicio puede
-alcanzar a los demás por su nombre. Las credenciales se pasan a ambos
-contenedores vía `.env`, nunca escritas directamente en el código.
+- La terminal muestra `Jupyter Server ... is running at: http://localhost:8888/lab`
+- Jupyter está disponible en http://localhost:8888 sin pedir token
+- El cuaderno `notebooks/00_verificacion.ipynb` corre completo (Run → Run All Cells) sin errores de importación ni discrepancias de versión
+- La última celda del cuaderno imprime `Conexion exitosa a PostgreSQL`, confirmando que el servicio `jupyter` alcanza al servicio `db` por la red interna de Docker Compose
 
-## Cómo se verifica que funcionó
-
-Abra `notebooks/00_verificacion.ipynb` y ejecútelo completo
-(Run → Run All Cells). Si todas las celdas corren sin error — incluida la
-última, que confirma la conexión a PostgreSQL — el entorno está
-correctamente levantado.
+---
 
 ## Cómo se apaga
 
-```bash
+```
 docker compose down
 ```
+
+Para además borrar los datos persistidos de PostgreSQL (reinicio completo):
+
+```
+docker compose down -v
+```
+
+---
 
 ## Estructura del proyecto
 
 ```
 proyecto-secop/
-├── README.md              # este archivo, el contrato del proyecto
-├── docker-compose.yml      # declara el servicio de Jupyter y sus versiones
-├── requirements.txt        # dependencias de Python con versión anclada
-├── .gitignore               # protege datos y credenciales de subirse a Git
-├── data/
-│   └── raw/                # dato crudo, NUNCA se versiona en Git
+├── README.md
+├── docker-compose.yml
+├── requirements.txt
+├── .gitignore
+├── .env.example          # claves sin valores, como referencia
+├── data/raw/              # datos, NO versionados
 ├── notebooks/
 │   └── 00_verificacion.ipynb
-├── src/                     # código reutilizable (no cuadernos sueltos)
+├── src/
 └── docs/
-    └── ficha_tecnica.md    # T1: ficha técnica de la fuente
+    ├── ficha_tecnica.md              # T1
+    ├── decision_frontera_contenedor.md
+    └── guia_incorporacion.md
 ```
 
-## Datos
+---
 
-Los datos de este proyecto (SECOP II) no están incluidos en este repositorio,
-siguiendo la regla de que los datos nunca se versionan en Git. Descárguelos
-desde:
+## Si algo falla
 
-https://www.datos.gov.co/Estad-sticas-Nacionales/SECOP-II-Contratos-Electr-nicos/jbjy-vk9h
+| Problema | Solución |
+|---|---|
+| Puerto 8888 ocupado | Cambie el mapeo en `docker-compose.yml` a `"8889:8888"` y acceda por `http://localhost:8889` |
+| `failed to resolve reference` al hacer `docker compose up` | El tag de una imagen no existe en el registro. Ver causa raíz documentada en `docs/decision_frontera_contenedor.md` |
+| La instalación se queda compilando una librería (ej. pandas) y falla | La versión anclada en `requirements.txt` no tiene paquete precompilado para la versión de Python de la imagen. Ver `docs/decision_frontera_contenedor.md` |
+| El navegador dice "Kernel does not exist" al abrir un notebook | Quedó una pestaña vieja de una sesión anterior de Docker. Cierre la pestaña, refresque, y abra `http://localhost:8888` de nuevo |
 
-y colóquelos en `data/raw/`.
+Contacto del responsable del repositorio: Ana Sofía Henao Torres (usuario de GitHub: sofiihenaotorress2007-a11y).
+
+---
+
+## Guía de incorporación
+
+Ver `docs/guia_incorporacion.md` — guía de una página para que un integrante nuevo del equipo tenga el proyecto corriendo en su primer día sin depender de nadie más, incluyendo los tres fallos reales encontrados durante la construcción de este repositorio.
+
+---
+
+## Declaración de uso de asistentes de inteligencia artificial
+
+- **Herramienta usada:** Claude (Anthropic)
+- **En qué parte:** diseño de la estructura de carpetas, redacción inicial de `docker-compose.yml` y `requirements.txt`, diagnóstico y corrección de tres fallos reales de compatibilidad de versiones con Python 3.13 (detallados en `docs/decision_frontera_contenedor.md`), y redacción de la documentación (README, ficha técnica, decisión de frontera del contenedor, guía de incorporación).
+- **Qué verifiqué contra ejecución real:** confirmé que el compose levanta el entorno desde un estado limpio ejecutando `docker compose down -v` (que borra también los datos de PostgreSQL) seguido de `docker compose up` en mi propio equipo, y corriendo el cuaderno de verificación completo, incluida la celda de conexión a PostgreSQL, con resultado exitoso.
+
+---
+
+## Lista de verificación antes de entregar
+
+- [x] `.gitignore` escrito antes del primer commit; no hay datos ni credenciales en la historia
+- [x] `requirements.txt` con todas las versiones ancladas con doble igual
+- [x] `docker-compose.yml` con dos servicios y versiones ancladas
+- [x] Cuaderno de verificación ejecutado, con salidas visibles
+- [x] Ficha T1 versionada en `docs/`
+- [x] Varios commits con mensajes que explican qué cambió
+- [ ] **Prueba del clon limpio:** cloné en una carpeta nueva y levantó sin que yo tocara nada (pendiente — ver siguiente paso)
+- [x] Repositorio público
+
+---
 
 ## Fuente del proyecto
 
-Ver `docs/ficha_tecnica.md` para el detalle completo de origen, licencia,
-mediciones de volumen y cálculo del umbral de saturación de esta fuente.
+Ver `docs/ficha_tecnica.md` para el detalle completo de origen, licencia, mediciones de volumen y cálculo del umbral de saturación de esta fuente.
+
+---
+
+*IFPN0025 · Big Data e Ingeniería de Datos · Universidad Ean. README basado en la plantilla T2, versión `S02_P6_v1`.*
