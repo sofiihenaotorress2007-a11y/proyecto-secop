@@ -120,7 +120,7 @@ Ver `docs/guia_incorporacion.md` — guía de una página para que un integrante
 - [x] Cuaderno de verificación ejecutado, con salidas visibles
 - [x] Ficha T1 versionada en `docs/`
 - [x] Varios commits con mensajes que explican qué cambió
-- [ ] **Prueba del clon limpio:** cloné en una carpeta nueva y levantó sin que yo tocara nada (pendiente — ver siguiente paso)
+- [x] **Prueba del clon limpio:** cloné en una carpeta nueva y levantó sin que yo tocara nada
 - [x] Repositorio público
 
 ---
