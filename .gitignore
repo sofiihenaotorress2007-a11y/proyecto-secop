@@ -1,0 +1,18 @@
+# Datos: nunca se versionan en Git (grandes, binarios, no comparables)
+data/raw/*
+!data/raw/.gitkeep
+
+# Credenciales y variables de entorno
+.env
+*.key
+*.pem
+credentials*
+
+# Archivos temporales de Jupyter y Python
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
