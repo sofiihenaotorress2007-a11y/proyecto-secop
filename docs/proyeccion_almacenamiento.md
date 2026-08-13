@@ -82,7 +82,45 @@ latency and the complexity of resolving conflicting updates.
 
 ---
 
-## 6. Prueba del tercero
+## 5.5. Nivel 3 — Decisión de tamaño de bloque (evidencia práctica propia)
+
+Además del factor de réplica, HDFS exige decidir el tamaño de bloque. Se probaron
+dos configuraciones reales en un clúster HDFS local (1 namenode + 3 datanodes,
+Docker Compose), cargando una muestra real de 36,4 MB de SECOP II en cada una:
+
+| Configuración | Tamaño de bloque | Factor R | Bloques generados (muestra 36,4 MB) | Verificado con |
+|---|---|---|---|---|
+| Nivel 1 (default HDFS) | 128 MB | 3 | 1 bloque | `hdfs fsck -files -blocks -locations` |
+| Nivel 2 (experimento) | 8 MB | 2 | 5 bloques | `hdfs fsck -files -blocks -locations` |
+
+**Hallazgo clave:** el tamaño de bloque no afecta cuánto disco físico se ocupa —
+eso lo determina únicamente el factor de réplica. Lo que sí afecta es **cuántos
+bloques debe rastrear el namenode**, el componente que la propia guía de la sesión
+identifica como el punto sensible de la arquitectura (*"el nodo maestro concentra
+el conocimiento... por eso se protege con mecanismos de alta disponibilidad"*).
+
+Extrapolando esta relación al **volumen real proyectado a 12 meses** (V₁₂ = 4,987
+GB, calculado en la sección 2):
+
+| Tamaño de bloque | N.º de bloques sobre V₁₂ | Copias de bloque (R=3) |
+|---|---|---|
+| 128 MB | **40** | 120 |
+| 8 MB | **639** | 1.917 |
+
+Con bloques de 8 MB, el namenode tendría que rastrear **16 veces más fragmentos**
+que con el tamaño estándar de 128 MB, sin ninguna ganancia de espacio a cambio.
+
+### Recomendación de tamaño de bloque: 128 MB (el estándar real de HDFS)
+
+La advertencia de la guía sobre bloques grandes ("desperdician espacio con
+archivos pequeños") no aplica a esta fuente: SECOP II es un flujo tabular
+continuo de varios GB, no un conjunto de archivos diminutos. Un bloque de 128 MB
+no desperdicia nada aquí, y sí reduce drásticamente la carga de metadata sobre el
+componente más frágil del clúster.
+
+**Decisión final del equipo para T3: factor de réplica 3, tamaño de bloque 128 MB.**
+
+
 
 Con únicamente esta ficha (S₀, g, tamaño de bloque, y las fórmulas de la sección 2-3),
 otra persona puede recalcular V₁₂ = 4,987 GB, y de ahí las tres filas de la tabla de
