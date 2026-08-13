@@ -1,7 +1,7 @@
 # T3 · Proyección de almacenamiento y factor de réplica
 
 **Equipo:** [completar con el nombre del equipo]
-**Integrantes:** Ana Sofía Henao Torres, [Simón Robles], [tercer integrante]
+**Integrantes:** Ana Sofía Henao Torres, [Simón Robles], [Samuel Esteban Gomez alfonso]
 **Fuente consolidada:** SECOP II — Contratos Electrónicos (Colombia Compra Eficiente)
 
 ---
