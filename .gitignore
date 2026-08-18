@@ -2,6 +2,9 @@
 data/raw/*
 !data/raw/.gitkeep
 
+# Datos del lago MinIO: persistencia local del volumen, no versionada
+lago-equipo/datos_lago/
+
 # Credenciales y variables de entorno
 .env
 *.key

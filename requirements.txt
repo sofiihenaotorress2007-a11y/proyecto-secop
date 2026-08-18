@@ -3,4 +3,5 @@ numpy==2.1.1
 matplotlib==3.9.2
 sqlalchemy==2.0.35
 psycopg2-binary==2.9.10
+boto3==1.35.36
 
