@@ -77,10 +77,19 @@ proyecto-secop/
 ├── notebooks/
 │   └── 00_verificacion.ipynb
 ├── src/
-└── docs/
-    ├── ficha_tecnica.md              # T1
-    ├── decision_frontera_contenedor.md
-    └── guia_incorporacion.md
+├── docs/
+│   ├── ficha_tecnica.md              # T1
+│   ├── decision_frontera_contenedor.md
+│   ├── proyeccion_almacenamiento.md  # T3
+│   ├── reto_negocio.md
+│   ├── justificacion_fuente_equipo.md
+│   ├── glosario.md
+│   └── guia_incorporacion.md
+└── hdfs-cluster-equipo/               # cluster HDFS+YARN (sesiones 3-4)
+    ├── docker-compose.yml            # namenode, datanodes, YARN
+    ├── EVIDENCIA_T4.md                # T4: MapReduce, combinador, contadores
+    ├── muestra/                       # mapper/reducer/combiner (evidencia original)
+    └── muestra_t1t3/                  # mismo, adaptado al dataset oficial de T1/T3
 ```
 
 ---
