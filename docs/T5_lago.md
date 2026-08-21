@@ -15,7 +15,7 @@ Fuente del proyecto: SECOP II — Contratos Electrónicos (Colombia Compra Efici
 | Cubo | Qué contiene | Estado en el proyecto hoy |
 |---|---|---|
 | `cruda` | El dato tal como llegó de SECOP II, sin transformar | Poblado con T5 — `secop_sample_periodo2.csv` cargado |
-| `refinada` | El dato limpio, tipado y validado | Vacío por ahora; se poblará más adelante en el curso |
+| `refinada` | El dato limpio, tipado y validado | Poblado en T6 — Parquet (codec zstd) particionado por `fecha_firma`, ver `docs/T6_formato.md` |
 | `consolidada` | El dato modelado y agregado, listo para consumir | Vacío por ahora |
 
 ---
