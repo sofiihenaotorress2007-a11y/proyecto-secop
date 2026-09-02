@@ -1,7 +1,7 @@
 # Nivel 3 · Frontera del contenedor — decisión de diseño
 
 **Proyecto:** proyecto-secop
-**Autora:** Ana Sofía Henao Torres
+**Autores:** Ana Sofía Henao Torres, Simon Robles Diaz, Samuel Gomez
 
 ## 1. Qué va en la imagen, qué se monta, qué se declara en compose
 

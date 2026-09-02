@@ -1,0 +1,17 @@
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: minio_lago
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    env_file:
+      - ../.env
+    ports:
+      # 9000 en el host ya lo ocupa el namenode de hdfs-cluster-equipo
+      # (puerto RPC de HDFS) - se mapea la API de MinIO a 9002 en el host
+      # para evitar el choque. El puerto interno del contenedor sigue
+      # siendo el 9000 estandar de MinIO.
+      - "9002:9000"   # interfaz de programacion, la API S3
+      - "9001:9001"   # consola web para inspeccionar
+    volumes:
+      - ./datos_lago:/data

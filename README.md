@@ -77,10 +77,31 @@ proyecto-secop/
 ├── notebooks/
 │   └── 00_verificacion.ipynb
 ├── src/
-└── docs/
-    ├── ficha_tecnica.md              # T1
-    ├── decision_frontera_contenedor.md
-    └── guia_incorporacion.md
+│   ├── ingesta/
+│   │   └── cargar_cruda.py           # sube la fuente cruda al lago (T5)
+│   └── refinar/
+│       ├── lago_utils.py             # cliente S3 compartido (T6)
+│       ├── medir_codecs.py           # tabla comparativa de codecs + DuckDB (T6)
+│       └── convertir_parquet.py      # CSV crudo -> Parquet particionado en refinada (T6)
+├── docs/
+│   ├── ficha_tecnica.md              # T1
+│   ├── decision_frontera_contenedor.md
+│   ├── proyeccion_almacenamiento.md  # T3
+│   ├── reto_negocio.md
+│   ├── justificacion_fuente_equipo.md
+│   ├── glosario.md
+│   ├── guia_incorporacion.md
+│   ├── T5_lago.md                    # T5: mapa del lago, particion, versionado
+│   ├── T6_formato.md                 # T6: codecs, justificacion, costo-beneficio
+│   └── T6_ejecucion.md               # T6: comandos y salidas reales
+├── hdfs-cluster-equipo/               # cluster HDFS+YARN (sesiones 3-4)
+│   ├── docker-compose.yml            # namenode, datanodes, YARN
+│   ├── EVIDENCIA_T4.md                # T4: MapReduce, combinador, contadores
+│   ├── muestra/                       # mapper/reducer/combiner (evidencia original)
+│   └── muestra_t1t3/                  # mismo, adaptado al dataset oficial de T1/T3
+└── lago-equipo/                       # almacenamiento de objetos MinIO (sesion 5)
+    ├── docker-compose.yml            # servicio MinIO
+    └── EVIDENCIA_T5.md                # T5: cubos, particion, versionado real
 ```
 
 ---

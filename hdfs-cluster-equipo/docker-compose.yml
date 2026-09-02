@@ -46,6 +46,37 @@ services:
     volumes:
       - datanode3-data:/hadoop/dfs/data
 
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
+    container_name: resourcemanager
+    restart: unless-stopped
+    environment:
+      - SERVICE_PRECONDITION=namenode:9870 datanode1:9864
+    env_file:
+      - hadoop.env
+    ports:
+      - "8088:8088"                 # interfaz web del gestor de recursos
+
+  nodemanager:
+    build: ./nodemanager   # extiende la imagen base con python3 (ver Dockerfile)
+    container_name: nodemanager
+    restart: unless-stopped
+    environment:
+      - SERVICE_PRECONDITION=resourcemanager:8088
+    env_file:
+      - hadoop.env
+
+  historyserver:
+    image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
+    container_name: historyserver
+    restart: unless-stopped
+    environment:
+      - SERVICE_PRECONDITION=resourcemanager:8088
+    env_file:
+      - hadoop.env
+    ports:
+      - "8188:8188"                 # historial de trabajos y contadores
+
 volumes:
   namenode-data:
   datanode1-data:
