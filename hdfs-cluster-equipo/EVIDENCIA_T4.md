@@ -335,14 +335,28 @@ tener que reagregar el resultado más granular después.
   conservan las secciones 1-3 tal cual (evidencia real, solo que del
   archivo equivocado) en vez de borrarlas, siguiendo el mismo principio de
   no ocultar lo que pasó de verdad.
-- **Instalación de Python en el nodemanager** — resuelto: se movió a
+- **Instalación de Python en el nodemanager** — resuelto y **verificado con
+  build real (2026-09-03):** se movió a
   `hdfs-cluster-equipo/nodemanager/Dockerfile`, que el `docker-compose.yml`
   ahora construye (`build: ./nodemanager`) en vez de usar la imagen base
-  `bde2020/hadoop-nodemanager` directamente. **Sin verificar con un build
-  real todavía** (Docker Desktop no estaba corriendo al escribir este
-  Dockerfile) — antes de confiar en él, alguien del equipo debe correr
-  `docker compose up -d --build` y repetir al menos el job del Nivel 1 para
-  confirmar que `python3` queda disponible y el job corre igual que antes.
+  `bde2020/hadoop-nodemanager` directamente. Se corrió
+  `docker compose build nodemanager` sobre esta copia del repositorio: la
+  imagen `hdfs-cluster-equipo-nodemanager` se construyó sin errores (apt
+  contra `archive.debian.org`, instala `python3` 3.5.3). Se confirmó con
+  `docker run --rm hdfs-cluster-equipo-nodemanager python3 --version` →
+  `Python 3.5.3`, la misma versión ya documentada arriba (§0) como la que
+  obliga a evitar f-strings.
+  **Nota real, no ocultada:** esta verificación fue solo del build de la
+  imagen, no de un job corriendo dentro de la red del clúster — el
+  nodemanager que está efectivamente vivo en este equipo hoy sigue siendo
+  el de la copia de Desktop (`docker compose ls` lo confirma: el stack
+  `hdfs-cluster-equipo` corriendo apunta a
+  `Desktop\...\hdfs-cluster-equipo\docker-compose.yml`, no al de este
+  repositorio), y ambos usan el mismo `container_name: nodemanager`, así
+  que no pueden correr los dos a la vez sin tumbar el clúster vivo. Repetir
+  el job del Nivel 1 end-to-end contra el compose de este repositorio
+  queda pendiente para cuando el equipo decida migrar del copy de Desktop
+  al de este repositorio como clúster de trabajo.
 - **Python 3.5.3** es la versión real disponible en el clúster (Debian 9
   stretch, EOL). Todo el código Python de esta práctica evita
   deliberadamente sintaxis de 3.6+ (f-strings) por esta razón.
