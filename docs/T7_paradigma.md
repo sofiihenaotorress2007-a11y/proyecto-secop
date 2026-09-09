@@ -4,6 +4,7 @@
 **Integrantes:** «pendiente — se completa por fuera de este borrador»
 **Proyecto:** SECOP II — Contratos Electrónicos
 **Fecha:** «AAAA-MM-DD»
+**Curso:** IFPN0025 · Big Data e Ingeniería de Datos · Universidad Ean
 
 > Primer ladrillo del documento de arquitectura del hito de la sesión 8. Verificación por criterio de aceptación, no por rúbrica.
 
