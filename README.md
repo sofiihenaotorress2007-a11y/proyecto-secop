@@ -95,7 +95,9 @@ proyecto-secop/
 │   ├── T6_formato.md                 # T6: codecs, justificacion, costo-beneficio
 │   ├── T6_ejecucion.md               # T6: comandos y salidas reales
 │   ├── T7_paradigma.md               # T7: paradigma (lotes), compromiso CAP
-│   └── T8_arquitectura.md            # T8: arquitectura de referencia, diagramas C4
+│   ├── T8_arquitectura.md            # T8: arquitectura de referencia, diagramas C4
+│   └── adr/
+│       └── 0001-almacenamiento.md    # T9: ADR — lago por capas vs almacén vs lakehouse
 ├── hdfs-cluster-equipo/               # cluster HDFS+YARN (sesiones 3-4)
 │   ├── docker-compose.yml            # namenode, datanodes, YARN
 │   ├── EVIDENCIA_T4.md                # T4: MapReduce, combinador, contadores
