@@ -83,7 +83,11 @@ Esta es la dimensión con menos evidencia directa del grupo: no se ha ejecutado 
 
 ## 4. El diagrama del esquema estrella
 
-Archivo editable: [`docs/T10_esquema_estrella.drawio`](T10_esquema_estrella.drawio). Vista equivalente en Mermaid (mismo esquema, mismas claves):
+Archivo editable: [`docs/T10_esquema_estrella.drawio`](T10_esquema_estrella.drawio). Imagen exportada desde draw.io:
+
+![Esquema estrella de hechos_contrato con sus cuatro dimensiones](T10_esquema_estrella.png)
+
+Vista alternativa en Mermaid (mismo esquema, mismas claves):
 
 ```mermaid
 erDiagram
