@@ -14,7 +14,9 @@
 
 ## 1. Contexto
 
-El proyecto ya tiene, construido y verificado con ejecución real, un lago de tres capas (`cruda` → `refinada` → `consolidada`) sobre MinIO, con Parquet codec zstd en la capa refinada (T5, T6). También tiene un contenedor PostgreSQL 16 desplegado desde T2, "reservado para la capa consolidada, aún sin poblar" (`docs/T8_arquitectura.md`, sección 4). Ningún componente de tipo lakehouse (Delta Lake, Apache Iceberg, Apache Hudi o equivalente) existe hoy en el repositorio.
+El proyecto ya tiene, construido y verificado con ejecución real, un lago de tres capas (`cruda` → `refinada` → `consolidada`) sobre MinIO, con Parquet codec zstd en la capa refinada (T5, T6). También tiene un contenedor PostgreSQL 16 desplegado desde T2, hoy sin poblar. Ningún componente de tipo lakehouse (Delta Lake, Apache Iceberg, Apache Hudi o equivalente) existe hoy en el repositorio.
+
+**Decisión del equipo sobre el rol de PostgreSQL (2026-09-29).** El equipo decidió que PostgreSQL no compite con el lago como almacenamiento principal del dataset — ese papel lo resuelve este mismo ADR a favor del lago (sección 2). PostgreSQL se reserva como **capa de servicio**: guarda resultados ya calculados y listos para consumir, no el dato crudo ni el histórico completo. En concreto, dos usos previstos: los agregados de R3 (análisis histórico y de tendencia, hoy resueltos en la capa `consolidada` en Parquet) y el registro de alertas de R4 (contratos con monto atípico o de contratación directa, ver `docs/T7_paradigma.md`). **Esto es una decisión de diseño, no una implementación**: el contenedor está desplegado desde T2 pero no tiene hoy ningún esquema, ninguna tabla ni ningún job que escriba en él — se declara aquí para que quede registrado el rol previsto, no para dar a entender que ya está poblado.
 
 **La fuerza que obliga a decidir.** T8 ya adoptó la arquitectura "vía única con flujo acotado" (sin capa de velocidad tipo Lambda) apoyada en ese lago de tres capas. Pero T8 no comparó explícitamente almacén, lago y lakehouse con una matriz de criterios — solo asumió el lago porque ya existía desde T5. Este ADR llena ese vacío: compara las tres opciones con una matriz ponderada y registra si la elección de hecho (el lago) resiste el escrutinio explícito, o si debería reconsiderarse.
 
@@ -77,7 +79,7 @@ $$ \text{puntaje} = \sum_{i=1}^{6} \left( \text{peso}_i \times \text{calificaci�
 
 El lago gana con un margen amplio: 4,20 frente a 3,55 del lakehouse y 3,20 del almacén — una diferencia de 0,65, no los 0,15 ajustados del ejemplo del acueducto. El puntaje coincide aquí con lo que el proyecto ya construyó desde T5/T6, y por una razón concreta: el criterio de mayor peso (rendimiento de consulta analítica, 25 %) y el de adecuación al volumen y frescura (15 %) ya tienen evidencia de ejecución real a favor del lago, mientras que el único criterio donde el lago es débil (soporte transaccional, calificación 1) pesa apenas 10 % porque ningún requisito del proyecto lo exige hoy (T7).
 
-**Decisión: mantener el lago por capas (MinIO + Parquet zstd) como almacenamiento del proyecto.** No se adopta lakehouse ni se migra a almacén relacional como capa principal en esta etapa.
+**Decisión: mantener el lago por capas (MinIO + Parquet zstd) como almacenamiento del proyecto.** No se adopta lakehouse ni se migra a almacén relacional como capa principal en esta etapa. PostgreSQL se reserva como capa de servicio complementaria —no como alternativa al lago— para los resultados ya calculados de R3 y el registro de alertas de R4 (ver sección 1, decisión del equipo sobre su rol); esto no reabre la comparación de la matriz, porque no compite por el rol de almacenamiento principal que la matriz sí evaluó.
 
 ---
 
@@ -107,7 +109,7 @@ Es decir, el peso de soporte transaccional tendría que **más que duplicarse**,
 
 **El costo operativo que se acepta mantener.** El equipo sigue operando tres stacks Docker separados (raíz, `lago-equipo`, `hdfs-cluster-equipo`, documentado en T8 sección 4) en vez de uno solo. Esta decisión no lo resuelve ni lo empeora: es una observación de T8, no una consecuencia nueva de T9.
 
-**El contenedor PostgreSQL sigue sin un rol definido.** Está desplegado desde T2 y "reservado para la capa consolidada" (T8), pero esta decisión no le asigna una función activa: la capa `consolidada` sigue viviendo como Parquet en MinIO, igual que `refinada`. Si el equipo decide en el futuro poblar PostgreSQL, eso sería una decisión nueva, no una consecuencia implícita de este ADR.
+**El contenedor PostgreSQL ya tiene un rol decidido, pero todavía no construido.** El equipo decidió usarlo como capa de servicio para los agregados de R3 y el registro de alertas de R4 — no como almacenamiento principal, ese papel sigue siendo del lago. Hoy sigue desplegado y sin poblar: no hay esquema, tabla ni job que escriba en él. Quien llegue después no debe interpretar el contenedor corriendo como evidencia de que ya sirve agregados — es diseño declarado, igual que R4 lo es en T7/T8, y construirlo es trabajo futuro, no algo que este ADR ya resolvió.
 
 **Cuándo reabrir esta decisión.** Revisar esta decisión si aparece cualquiera de estas señales, no antes:
 1. Un requisito real (no hipotético) de auditoría que exija reconstruir el estado exacto de un contrato individual en una fecha pasada — más allá de recuperar el snapshot completo por `VersionId`.
@@ -128,7 +130,8 @@ Si ninguna de estas tres condiciones se cumple, el lago por capas actual sigue s
 - [x] Las consecuencias incluyen al menos un costo aceptado (ausencia de ACID y viaje en el tiempo fila a fila), no solo ventajas.
 - [x] Se identificó el peso que hace bascular la decisión (soporte transaccional) y el umbral donde cambiaría (≈22,6 %), sin forzar los pesos para llegar a un resultado predeterminado.
 - [x] El equipo revisó y confirmó los seis pesos y sus justificaciones como su propio juicio de ingeniería (confirmado 2026-09-29), no solo como un borrador de IA sin revisar.
-- [ ] **Pendiente por el equipo:** decidir si le dan un rol activo al contenedor PostgreSQL ya desplegado, o si lo mantienen sin poblar indefinidamente.
+- [x] El equipo decidió el rol de PostgreSQL (capa de servicio para agregados de R3 y registro de alertas de R4, confirmado 2026-09-29) y se declaró explícitamente como diseño, no como implementación.
+- [ ] **Pendiente por el equipo:** construir el esquema de PostgreSQL y el job que lo puebla, cuando el curso llegue a la etapa de implementación de R3/R4 (hoy no hay ni esquema ni job, ver sección 4).
 
 ---
 
@@ -150,3 +153,4 @@ Reis, J., y Housley, M. (2022). *Fundamentals of data engineering*. O'Reilly Med
 - **En qué parte:** lectura y consolidación de las cifras ya documentadas en T1, T3, T5, T6, T7 y T8; diseño y justificación de los seis pesos de la matriz a partir de esas cifras (no de la tabla de ejemplo genérica de la guía); cálculo de los puntajes y del análisis de sensibilidad (umbral ≈22,6 % para el peso de soporte transaccional); y redacción completa de este documento, incluida la sección de consecuencias para el reto de comunicación.
 - **Qué verifiqué:** que cada cifra citada (V₁₂ = 4,987 GB, reducción de 74,4 %/82 %, ≈87× de velocidad de consulta, la ausencia de viaje en el tiempo fila a fila en `cruda`) existe tal cual en el documento fuente indicado entre paréntesis — ninguna se recalculó ni se inventó. El cálculo del umbral de sensibilidad se verificó de dos formas independientes (fórmula algebraica y sustitución numérica directa en la matriz), y ambas coinciden en ≈22,6 %.
 - **Verificado por el equipo:** los seis pesos fueron revisados y confirmados por el equipo como su propio juicio de ingeniería (2026-09-29), no aceptados sin revisión.
+- **Actualización posterior (2026-09-29):** a petición del equipo, se incorporó la decisión sobre el rol de PostgreSQL (capa de servicio para agregados de R3 y registro de alertas de R4, no almacenamiento principal) en las secciones 1, 2 y 4, y se actualizó `docs/T8_arquitectura.md` (diagrama de contenedor y su descripción) para que ambos documentos queden coherentes. Se declaró explícitamente como diseño no implementado, siguiendo el mismo criterio ya usado para R4 en T7/T8: el contenedor existe desplegado, pero sin esquema ni job que lo pueble.

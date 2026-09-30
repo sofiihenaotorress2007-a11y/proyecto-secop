@@ -84,25 +84,28 @@ flowchart TB
         jupyter["📦 Contenedor C4<br/><b>Jupyter</b><br/>[Docker: quay.io/jupyter/scipy-notebook]<br/>Entorno de ingesta, transformación\ny análisis (src/ingesta, src/refinar)"]
         minio["📦 Contenedor C4<br/><b>Lago MinIO</b><br/>[Docker: minio/minio, API S3]<br/>Cubos cruda / refinada / consolidada,\nversionado activo en cruda"]
         hdfs["📦 Contenedor C4<br/><b>Clúster HDFS + YARN</b><br/>[Docker: bde2020/hadoop-*]<br/>1 namenode + 3 datanodes, réplica 3,\nresourcemanager + nodemanager + historyserver"]
-        pg["📦 Contenedor C4<br/><b>PostgreSQL 16</b><br/>[Docker: postgres:16.4]<br/>Almacén relacional — reservado para\ncapa consolidada, aún sin poblar"]
+        pg["📦 Contenedor C4 (planeado)<br/><b>PostgreSQL 16</b><br/>[Docker: postgres:16.4]<br/>Capa de servicio — agregados de R3\ny registro de alertas de R4,\naún sin esquema ni job — NO POBLADO"]
         alertas["📦 Contenedor C4 (planeado)<br/><b>Job de alertas casi-real — R4</b><br/>[Propuesto: proceso programado, cada hora]<br/>Evalúa monto atípico / contratación directa\nsobre los contratos nuevos — NO IMPLEMENTADO"]
     end
 
     analista -- "Escribe y ejecuta\nnotebooks/scripts [HTTP :8888]" --> jupyter
     jupyter -- "Sube CSV crudo, lee/escribe\nParquet [API S3, boto3]" --> minio
     jupyter -- "Envía jobs Hadoop Streaming\n(MapReduce) [CLI hadoop jar]" --> hdfs
-    jupyter -- "Verifica conexión, futura\ncarga de agregados [SQL, psycopg2]" --> pg
+    jupyter -. "Verifica conexión, futura\ncarga de agregados R3 y alertas R4\n[SQL, psycopg2] (planeado)" .-> pg
     jupyter -- "Descarga snapshot / consulta\nincremental diaria [HTTPS, API SODA]" --> portal
     alertas -. "Sondea contratos nuevos\ncada hora [HTTPS, API SODA] (planeado)" .-> portal
     alertas -. "Envía alerta al detectar\numbral superado [canal por definir] (planeado)" .-> analista
 
     classDef planned stroke-dasharray: 5 5
     class alertas planned
+    class pg planned
 ```
 
 **Observación voluntaria del equipo, no exigida por la rúbrica.** El diagrama de arriba muestra la arquitectura lógica: cómo se comunican los contenedores C4, sin importar en qué red de Docker corre cada uno hoy. Para quien vaya a reproducir el proyecto, vale aclarar que en la práctica los tres stacks de Docker Compose (raíz, `lago-equipo`, `hdfs-cluster-equipo`) corren como despliegues separados, cada uno en su propia red: Jupyter llega a MinIO por `host.docker.internal:9002` (ver `lago-equipo/EVIDENCIA_T5.md`, sección 0), y el envío de jobs al clúster HDFS/YARN se ha hecho hasta ahora desde la línea de comandos dentro del propio clúster, no automatizado desde Jupyter (ver `hdfs-cluster-equipo/EVIDENCIA_T4.md`, sección "Ausencias y desviaciones"). Unificar los tres stacks en una sola red no es un requisito de T2, T5 ni de esta tarea — es una mejora de comodidad operativa que el equipo puede considerar más adelante si le resulta útil, no una brecha frente al enunciado.
 
 **El contenedor de R4 (con borde punteado en el diagrama) es una propuesta de diseño, no código existente.** No hay hoy ningún proceso programado, ninguna regla de umbral codificada, ningún contenedor Docker ni ningún mecanismo de notificación para R4 en el repositorio. Se documenta aquí porque la sección 3 lo usa para justificar por qué la arquitectura elegida es "vía única con flujo acotado" y no Lambda: implementarlo, cuando llegue esa etapa del curso, requiere solo un job programado (p. ej. un cron dentro del contenedor de Jupyter o un contenedor nuevo y ligero) que reutilice el mismo cliente de la API SODA que ya usará R2 — no un componente de streaming nuevo.
+
+**El rol de PostgreSQL (con borde punteado en el diagrama, actualizado en T9) también es diseño, no implementación.** El ADR de almacenamiento del proyecto (`docs/adr/0001-almacenamiento.md`) decidió que PostgreSQL no compite con el lago como almacenamiento principal — ese papel es del lago de tres capas — sino que se reserva como **capa de servicio** para dos usos: los agregados de R3 (hoy resueltos en Parquet en la capa `consolidada`) y el registro de alertas de R4. El contenedor está desplegado desde T2, pero no tiene hoy ningún esquema, ninguna tabla ni ningún job que lo pueble; construirlo es trabajo futuro, ligado a cuando R3 y R4 pasen de diseño a implementación.
 
 ---
 
@@ -146,6 +149,7 @@ Reis, J., y Housley, M. (2022). *Fundamentals of data engineering*. O'Reilly Med
 - **Herramienta usada:** Claude (Anthropic), a través de Claude Code.
 - **En qué parte:** lectura y consolidación de las cifras y decisiones ya documentadas en T1, T3, T4, T5, T6 y T7; razonamiento y redacción de la decisión de arquitectura de la sección 3 (vía única con flujo acotado, en vez de Lambda o malla de datos), derivada del paradigma híbrido que T7 establece; diseño de los dos diagramas C4 en Mermaid; y redacción completa de este documento.
 - **Actualización posterior:** a petición del equipo, se revisó si la rúbrica de T8 exige un requisito genuino de flujo o casi-real (la plantilla ofrece "lotes / flujo / casi real" como opciones y "Lambda modesta" como arquitectura posible, lo que sugiere que se espera al menos un caso que no sea lotes puro). Se agregó **R4 · alerta de contratos nuevos con monto atípico o de contratación directa**, con sondeo horario a la API SODA, como requisito de diseño explícito — no implementado — y se actualizaron de forma coherente T7 (tabla de Parte A, Parte C y Supuestos 2 y 4) y esta sección 3 y los diagramas de la sección 4. El volumen de R4 (≈5-6 contratos/hora) es una extrapolación aritmética de la cifra diaria ya medida en T1 (≈130-155 contratos/día), no una medición nueva.
+- **Actualización posterior (T9, 2026-09-29):** a petición del equipo, se incorporó la decisión de `docs/adr/0001-almacenamiento.md` sobre el rol de PostgreSQL — capa de servicio para agregados de R3 y registro de alertas de R4, no almacenamiento principal — en el diagrama de contenedor (nodo `pg` marcado como planeado, borde punteado, texto "NO POBLADO") y en el párrafo posterior al diagrama, con la misma convención ya usada para el contenedor de R4.
 - **Qué verifiqué:** que cada cifra citada en las secciones 1, 2 y 5 existe tal cual en el documento fuente indicado entre paréntesis (T1, T3, T4, T6, T7) — no se recalculó ni se reescaló ningún número para este documento, salvo la extrapolación horaria de R4, declarada como tal. Los diagramas C4 se revisaron contra las reglas de notación declaradas en la plantilla del enunciado (un nivel de abstracción por diagrama, flechas con etiqueta y dirección, contenedor C4 distinto de contenedor Docker); el contenedor de R4 se marcó explícitamente como planeado (borde punteado y texto "NO IMPLEMENTADO") para no dar a entender que ya existe. También releí la plantilla del enunciado para confirmar que no exige integrar los tres stacks de Docker Compose en una sola red — solo pide, en la sección 6, lo que ya documenta T2 (el `docker-compose.yml` de la raíz); la nota sobre los stacks separados en la sección 4 es una aclaración voluntaria de reproducibilidad, no una brecha frente al enunciado. **Pendiente de verificar por el equipo:** que el equipo confirme que R4, como requisito de diseño no implementado, satisface el criterio de la rúbrica antes de la entrega final.
 
 ---
