@@ -1,6 +1,6 @@
 # T1 · Ficha técnica de la fuente del proyecto
 
-**Estudiante:** Ana Sofía Henao Torres
+**Estudiante:** Ana Sofía Henao Torres, Simon Robles Diaz, Samuel Gomez
 **Fuente elegida:** SECOP II — Contratos Electrónicos
 **Fecha de elaboración:** 2026-08-02
 
