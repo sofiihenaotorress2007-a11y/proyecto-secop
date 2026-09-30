@@ -1,0 +1,62 @@
+<mxfile host="app.diagrams.net" agent="proyecto-secop T10" version="24.0.0">
+  <diagram name="Esquema estrella - hechos_contrato" id="t10-star-schema">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="826" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="fact" value="&lt;b&gt;hechos_contrato&lt;/b&gt;&lt;br&gt;&lt;i&gt;grano: una fila = un contrato de SECOP II&lt;/i&gt;&lt;hr&gt;sk_tiempo (FK)&lt;br&gt;sk_departamento (FK)&lt;br&gt;sk_modalidad (FK)&lt;br&gt;sk_estado (FK)&lt;br&gt;id_contrato (dimension degenerada)&lt;br&gt;valor_contrato (medida, COP)&lt;br&gt;n_contratos (medida, constante 1)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="440" y="340" width="280" height="180" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dimTiempo" value="&lt;b&gt;dim_tiempo&lt;/b&gt;&lt;hr&gt;sk_tiempo (PK)&lt;br&gt;fecha_firma (clave de origen)&lt;br&gt;anio&lt;br&gt;trimestre&lt;br&gt;mes&lt;br&gt;nombre_mes&lt;br&gt;dia&lt;br&gt;nombre_dia_semana" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="440" y="80" width="280" height="170" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dimDepto" value="&lt;b&gt;dim_departamento&lt;/b&gt;&lt;hr&gt;sk_departamento (PK)&lt;br&gt;departamento (clave de origen)&lt;br&gt;nombre_departamento" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="80" y="360" width="280" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dimModalidad" value="&lt;b&gt;dim_modalidad_contratacion&lt;/b&gt;&lt;hr&gt;sk_modalidad (PK)&lt;br&gt;modalidad_contratacion (clave de origen)&lt;br&gt;nombre_modalidad&lt;br&gt;es_contratacion_directa (booleano)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="800" y="360" width="300" height="140" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dimEstado" value="&lt;b&gt;dim_estado_contrato&lt;/b&gt;&lt;hr&gt;sk_estado (PK)&lt;br&gt;estado_contrato (clave de origen, valores sin verificar)&lt;br&gt;nombre_estado" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="440" y="600" width="280" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;" edge="1" parent="1" source="fact" target="dimTiempo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e1l" value="sk_tiempo" style="edgeLabel;html=1;align=center;fontSize=11;" vertex="1" connectable="0" parent="e1">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;" edge="1" parent="1" source="fact" target="dimDepto">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2l" value="sk_departamento" style="edgeLabel;html=1;align=center;fontSize=11;" vertex="1" connectable="0" parent="e2">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;" edge="1" parent="1" source="fact" target="dimModalidad">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3l" value="sk_modalidad" style="edgeLabel;html=1;align=center;fontSize=11;" vertex="1" connectable="0" parent="e3">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;" edge="1" parent="1" source="fact" target="dimEstado">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4l" value="sk_estado" style="edgeLabel;html=1;align=center;fontSize=11;" vertex="1" connectable="0" parent="e4">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <mxCell id="title" value="T10 - Esquema estrella - proyecto SECOP II (Equipo 6)" style="text;html=1;fontSize=14;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="80" y="20" width="600" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

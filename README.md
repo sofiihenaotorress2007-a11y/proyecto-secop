@@ -96,6 +96,8 @@ proyecto-secop/
 │   ├── T6_ejecucion.md               # T6: comandos y salidas reales
 │   ├── T7_paradigma.md               # T7: paradigma (lotes), compromiso CAP
 │   ├── T8_arquitectura.md            # T8: arquitectura de referencia, diagramas C4
+│   ├── T10_modelo_dimensional.md     # T10: grano, hechos y dimensiones (esquema estrella)
+│   ├── T10_esquema_estrella.drawio   # T10: diagrama editable del esquema estrella
 │   └── adr/
 │       └── 0001-almacenamiento.md    # T9: ADR — lago por capas vs almacén vs lakehouse
 ├── hdfs-cluster-equipo/               # cluster HDFS+YARN (sesiones 3-4)
